@@ -11,8 +11,13 @@
 ## 环境要求
 - Python 3.8+
 - pip (Python包管理器)
+- Docker & Docker Compose (可选，用于容器化部署)
 
-## 本地开发设置步骤
+## 部署方式
+
+本项目支持两种部署方式：传统Python部署和Docker容器化部署。
+
+### 方式一：传统Python部署
 
 1. 安装 Python 依赖
 ```bash
@@ -21,6 +26,31 @@ pip install -r requirements.txt
 
 2. 配置环境变量
 - 按照 `config.py` 配置 `.env` 环境参数
+
+3. 启动服务
+```bash
+uvicorn api:app --host 0.0.0.0 --port 8000
+```
+
+### 方式二：Docker容器化部署
+
+1. 准备环境变量配置
+```bash
+cp .env.example .env
+```
+然后编辑.env文件，设置必要的配置参数
+
+2. 构建和启动容器
+```bash
+docker-compose up -d
+```
+
+3. 查看服务状态
+```bash
+docker-compose ps
+```
+
+详细的Docker部署说明请参考 [DOCKER_DEPLOY.md](./DOCKER_DEPLOY.md)
 
 ## 使用说明
 

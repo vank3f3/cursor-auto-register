@@ -1,0 +1,48 @@
+# Git相关
+.git
+.gitignore
+
+# 数据库文件，将通过volume挂载
+accounts.db
+
+# 日志文件，将通过volume挂载
+*.log
+
+# 环境变量文件，将通过volume挂载
+.env
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+
+# IDE文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 其他
+.DS_Store
+Thumbs.db 

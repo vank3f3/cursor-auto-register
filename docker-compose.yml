@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  cursor-auto-register:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cursor-auto-register:latest
+    container_name: cursor-auto-register
+    restart: unless-stopped
+    shm_size: '2gb'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s 
