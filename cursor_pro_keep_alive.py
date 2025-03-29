@@ -10,7 +10,8 @@ from config import (
     SETTINGS_URL,
     EMAIL_DOMAINS,
     REGISTRATION_MAX_RETRIES,
-    EMAIL_TYPE
+    EMAIL_TYPE,
+    EMAIL_CODE_TYPE
 )
 
 
@@ -155,17 +156,10 @@ def sign_up_account(browser, tab, account_info):
         EmailVerificationHandler.create_zmail_email(account_info)
     tab.get(SIGN_UP_URL)
 
-    time.sleep(random.uniform(1, 3))
+    tab.wait(2)
 
-    wait_count = 1
-    while True:
-        if tab.ele("@name=first_name"):
-            break
-        if tab.ele("@name=cf-turnstile-response"):
-            error("开屏就是检测啊，大佬你的IP或UA需要换一下了啊，有问题了...要等一下")
-        time.sleep(random.uniform(3, 5))
-        info(f'第 {wait_count} 次等待...')
-        wait_count += 1
+    if tab.ele("@name=cf-turnstile-response"):
+        error("开屏就是检测啊，大佬你的IP或UA需要换一下了啊，有问题了...要等一下")
 
     try:
         if tab.ele("@name=first_name"):
@@ -429,6 +423,16 @@ def main():
     current_retry = 0
 
     try:
+        email_handler = EmailVerificationHandler()
+        if email_handler.check():
+            info('邮箱服务连接正常，开始注册!')
+        else:
+            if EMAIL_CODE_TYPE == "API":
+                error('邮箱服务连接失败，并且验证码为API获取，结束注册!')
+                return
+            else:
+                info('邮箱服务连接失败，并且验证码为手动输入，等待输入验证码...')
+
         email_generator = EmailGenerator()
         browser_manager = BrowserManager()
         browser = browser_manager.init_browser()

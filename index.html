@@ -332,7 +332,7 @@
                                             <small class="text-muted">True=无界面运行浏览器，False=显示浏览器界面</small>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="dynamic-useragent" class="form-label">动态User-Agent</label>
+                                            <label for="dynamic-useragent" class="form-label">动态User-Agent（先不要配置）</label>
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" type="checkbox" role="switch"
                                                     id="dynamic-useragent" disabled>
@@ -356,6 +356,16 @@
                                             <input type="number" id="accounts-limit" class="form-control" min="1"
                                                 disabled>
                                             <small class="text-muted">系统允许创建的最大账号数量</small>
+                                        </div>
+                                        
+                                        <!-- 验证码获取方式 -->
+                                        <div class="mb-3">
+                                            <label for="captcha-method" class="form-label">验证码获取方式</label>
+                                            <select id="captcha-method" class="form-control" disabled>
+                                                <option value="API">API自动获取</option>
+                                                <option value="INPUT">控制台手动输入</option>
+                                            </select>
+                                            <small class="text-muted">选择验证码的获取方式：API自动获取或通过控制台手动输入</small>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -573,6 +583,44 @@
                     <button type="button" class="btn btn-primary" id="useTokenBtn" data-account-id="">
                         <i class="fas fa-plug"></i> 使用此Token
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 账号使用记录模态框 -->
+    <div class="modal fade" id="usageRecordModal" tabindex="-1" aria-labelledby="usageRecordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="usageRecordModalLabel">账号使用记录</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>账号邮箱:</strong> <span id="recordEmail"></span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>使用时间</th>
+                                    <th>使用者IP</th>
+                                    <th>使用者UA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usageRecordBody">
+                                <!-- 记录将被动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-records" class="text-center p-4" style="display: none;">
+                        <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                        <p>暂无使用记录</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                 </div>
             </div>
