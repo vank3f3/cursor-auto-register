@@ -1,0 +1,85 @@
+name: 构建并发布Docker镜像
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+env:
+  IMAGE_NAME: cursor-auto-register
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  VERSION_FILE: .version
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取完整历史记录用于版本管理
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 设置 Git 用户信息
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: 版本号管理
+        id: version
+        run: |
+          # 检查版本文件是否存在
+          if [ ! -f "$VERSION_FILE" ]; then
+            # 如果不存在，创建初始版本号0.1.0
+            echo "0.1.0" > "$VERSION_FILE"
+            echo "VERSION=0.1.0" >> $GITHUB_ENV
+            echo "版本文件不存在，创建初始版本 0.1.0"
+          else
+            # 读取当前版本
+            CURRENT_VERSION=$(cat "$VERSION_FILE")
+            echo "当前版本: $CURRENT_VERSION"
+            
+            # 拆分版本号
+            IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            
+            # 增加补丁版本
+            PATCH=$((PATCH + 1))
+            
+            # 组装新版本号
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+            echo "$NEW_VERSION" > "$VERSION_FILE"
+            echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+            echo "版本号更新为: $NEW_VERSION"
+          fi
+          
+          echo "version=$(cat $VERSION_FILE)" >> $GITHUB_OUTPUT
+      
+      - name: 登录到 Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: 构建并推送 Docker 镜像
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+      
+      - name: 提交版本更新
+        run: |
+          git add "$VERSION_FILE"
+          git commit -m "自动更新版本号至 ${{ steps.version.outputs.version }} [skip ci]" || echo "没有需要提交的更改"
+          git push 
